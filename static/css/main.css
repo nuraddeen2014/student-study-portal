@@ -1,0 +1,375 @@
+.row.equalize-cols>[class*="col-"] .card .card-body,
+.row>.col-md-3 .card .card-body {
+    flex: 1 1 auto;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Quicksand:wght@300;400;600&display=swap');
+
+/* Global layout */
+:root {
+    /* Friendlier student palette */
+    --bg: #fbfdff;
+    /* very light blue */
+    --panel: #ffffff;
+    /* cards */
+    --muted: #6b7280;
+    /* subtle text */
+    --brand: #2563eb;
+    /* vibrant indigo-blue */
+    --accent: #06b6d4;
+    /* fresh cyan-teal */
+    --danger: #ef6c63;
+    /* soft coral for destructive actions */
+    --glass: rgba(255, 255, 255, 0.78);
+    --shadow: 0 8px 30px rgba(16, 24, 40, 0.06);
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, var(--bg), #eef6fb 120%);
+    font-family: Inter, Quicksand, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color: #111827;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+main {
+    padding: 2.25rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Top navbar */
+.navbar {
+    /* visible, slightly translucent dark navbar for contrast */
+    background: rgba(6, 12, 34, 0.96) !important;
+    padding: .65rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1060;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.navbar .navbar-brand {
+    font-weight: 700;
+    color: var(--brand);
+    letter-spacing: 0.2px;
+}
+
+.navbar .text-light {
+    color: #0f172a !important;
+}
+
+/* Sidebar (keeps same structure from templates) */
+.sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    width: 240px;
+    height: calc(100% - 64px);
+    background: linear-gradient(180deg, rgba(8, 30, 63, 0.98) 0%, rgba(6, 12, 34, 0.96) 120%);
+    padding-top: 18px;
+    transform: translateX(-110%);
+    transition: transform .28s cubic-bezier(.2, .9, .2, 1);
+    z-index: 1040;
+    box-shadow: 6px 14px 40px rgba(2, 6, 23, 0.4);
+}
+
+.sidebar.active {
+    transform: translateX(0);
+    background: linear-gradient(180deg, rgba(8, 30, 63, 0.98) 0%, rgba(6, 12, 34, 0.96) 120%);
+}
+
+/* Sidebar nav-link styles when sidebar is active */
+.sidebar.active .nav-link {
+    color: #cfeaf5;
+    padding: 12px 20px;
+    display: block;
+    border-radius: 8px;
+    margin: 6px 8px;
+}
+
+/* Card header inside sidebar nav-link */
+.sidebar.active .nav-link .card-header {
+    background: linear-gradient(90deg, var(--accent), var(--brand));
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Sidebar nav-link hover styles */
+.sidebar.active .nav-link:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+}
+
+/* Danger button inside sidebar nav-link hover */
+.sidebar.active .nav-link:hover .btn-danger {
+    background: var(--danger);
+    border-color: transparent;
+}
+
+/* Button focus inside sidebar */
+.sidebar.active .btn:focus {
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.12);
+}
+
+/* Navbar small text inside sidebar */
+.sidebar.active .navbar .small {
+    color: var(--muted);
+    margin-left: 8px;
+}
+
+/* Alert success inside navbar small text */
+.sidebar.active .navbar .small .alert-success {
+    background: linear-gradient(90deg, rgba(6, 182, 212, 0.06), rgba(37, 99, 235, 0.03));
+    border: 1px solid rgba(6, 182, 212, 0.12);
+    color: #064e3b;
+}
+
+/* Content offset when sidebar is visible on larger screens */
+@media(min-width: 992px) {
+    body .btn-outline-info {
+        color: var(--brand);
+        border-color: rgba(37, 99, 235, 0.12);
+        background: transparent;
+    }
+
+    body {
+        padding-left: 0;
+    }
+
+    main {
+        margin-left: 0;
+    }
+
+    .sidebar.active+main {
+        margin-left: 240px;
+    }
+}
+
+/* Cards and panels inside sidebar */
+.sidebar.active .card {
+    border: none;
+    background: var(--panel);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.sidebar.active .card-header {
+    background: linear-gradient(90deg, var(--accent), var(--brand));
+    color: #fff;
+    font-weight: 600;
+}
+
+.sidebar.active .card-body {
+    padding: 1.25rem;
+}
+
+.sidebar.active .card h4 {
+    margin-top: 0;
+}
+
+/* Make images feel nicer inside sidebar */
+.sidebar.active .card img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+}
+
+/* Buttons inside sidebar */
+.sidebar.active .btn {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.sidebar.active .btn-primary {
+    background: var(--brand);
+    border-color: transparent;
+}
+
+.sidebar.active .btn-outline-info {
+    color: var(--brand);
+    border-color: rgba(37, 99, 235, 0.12);
+    background: transparent;
+}
+
+.sidebar.active .btn-danger {
+    background: var(--danger);
+    border-color: transparent;
+}
+
+.sidebar.active .btn:focus {
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.12);
+}
+
+/* Forms inside sidebar */
+.sidebar.active .form-control {
+    border-radius: 8px;
+    padding: .6rem .75rem;
+    border: 1px solid #e6eef6;
+}
+
+.sidebar.active .form-group legend {
+    font-weight: 700;
+    color: var(--brand);
+}
+
+/* Alerts/messages inside sidebar */
+.sidebar.active .alert {
+    border-radius: 10px;
+    padding: .8rem 1rem;
+}
+
+.sidebar.active .alert-success {
+    background: linear-gradient(90deg, rgba(6, 182, 212, 0.06), rgba(37, 99, 235, 0.03));
+    border: 1px solid rgba(6, 182, 212, 0.12);
+    color: #064e3b;
+}
+
+/* Navigation styles kept safe inside sidebar */
+.sidebar.active .nav-link {
+    text-decoration: none;
+}
+
+/* Small tweaks for lists and spacing inside sidebar */
+.sidebar.active .container {
+    max-width: 1100px;
+}
+
+.sidebar.active .min-vh-100 {
+    min-height: calc(100vh - 140px);
+}
+
+/* Profile avatar inside sidebar */
+.sidebar.active .account-img {
+    height: 110px !important;
+    width: 110px !important;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 6px 20px rgba(2, 6, 23, 0.12);
+}
+
+.sidebar.active .account-heading {
+    font-size: 1.6rem;
+    margin-bottom: .25rem;
+}
+
+/* Footer inside sidebar */
+.sidebar.active footer {
+    margin-top: 3rem;
+    padding: 2rem 0;
+    color: var(--muted);
+}
+
+/* Utility helpers inside sidebar */
+.sidebar.active .text-muted {
+    color: var(--muted) !important;
+}
+
+/* Mobile niceties inside sidebar */
+@media(max-width:768px) {
+    .sidebar {
+        width: 72vw;
+    }
+
+    main {
+        padding: 1rem;
+    }
+}
+
+/* Keep legacy classes usable inside sidebar */
+.sidebar.active .content-section {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.sidebar.active .button {
+    display: inline-block;
+}
+
+/* Global image hover transitions used across templates */
+.card-img-top,
+.myimage {
+    transition: transform 0.45s cubic-bezier(.2, .9, .2, 1), opacity 0.35s ease;
+    will-change: transform, opacity;
+}
+
+.card-img-top:hover,
+.myimage:hover {
+    transform: scale(1.03);
+    opacity: 0.95;
+}
+
+/* Accent style used for portal username and time to match top-left brand */
+.portal-accent {
+
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--brand);
+    letter-spacing: 0.2px;
+}
+
+/* Even more specific rules to override inline or framework styles */
+.navbar .portal-accent,
+.card .portal-accent,
+.navbar .portal-accent *,
+.card .portal-accent * {
+    color: var(--brand) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.2px !important;
+}
+
+/* Equal-height columns utility
+   Usage: add class `equalize-cols` to the .row that contains .col-*-* children
+   Example: <div class="row equalize-cols"> ... <div class="col-md-3"> <div class="card">...</div>
+*/
+.row.equalize-cols>[class*="col-"] {
+    display: flex;
+    flex-direction: column;
+}
+
+.row.equalize-cols>[class*="col-"] .card {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    /* stretch cards to match the tallest column */
+}
+
+.row.equalize-cols>[class*="col-"] .card .card-body {
+    flex: 1 1 auto;
+    /* ensure card body grows to fill */
+}
+
+/* Safe fallback for rows using .col-md-3 specifically (opt-out by overriding) */
+.row>.col-md-3 {
+    display: flex;
+    flex-direction: column;
+}
+
+.row>.col-md-3 .card {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+.row>.col-md-3 .card .card-body {
+    flex: 1 1 auto;
+}
+
+/* Prevent card images from stretching the card height unnaturally */
+.row .card-img-top {
+    max-height: 180px;
+    object-fit: cover;
+}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+{% load static %}
+{% load tz %}
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Student-dashboard</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+    integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container-fluid d-flex align-items-center">
+            <button class="btn btn-outline-light mr-2" id="sidebarToggle" type="button" style="margin-right: 1rem;">
+              <i class="fas fa-bars"></i>
+            </button>
+            <a class="navbar-brand mb-0 h1" href="{% url 'home' %}">Student Study Portal</a>
+
+            <div class="ml-auto d-flex align-items-center">
+              {% if request.user.is_authenticated %}
+                <span class="small mr-3 portal-accent">Signed in: {{ request.user.username }}</span>
+                <form method="post" action="{% url 'logout' %}" class="mb-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                </form>
+              {% else %}
+                <a class="btn btn-outline-light btn-sm mr-2" href="{% url 'login' %}">Login</a>
+                <a class="btn btn-light btn-sm" href="{% url 'register' %}">Register</a>
+              {% endif %}
+            </div>
+          </div>
+    </nav>
+    <div id="sidebar" class="sidebar bg-dark">
+      <ul class="list-unstyled">
+        <li><a class="nav-link text-light" href="{% url 'home' %}">Home</a></li>
+  {% if request.user.is_authenticated %}
+        <li><a class="nav-link text-light" href="{% url 'profile' %}">Profile</a></li>
+        <li><a class="nav-link text-light" href="{% url 'books' %}">Books</a></li>
+        <li><a class="nav-link text-light" href="{% url 'wiki' %}">Wikipedia</a></li>
+        <li><a class="nav-link text-light" href="{% url 'dictionary' %}">Dictionary</a></li>
+        <li><a class="nav-link text-light" href="{% url 'youtube' %}">Youtube</a></li>
+        <li><a class="nav-link text-light" href="{% url 'todo' %}">To-do</a></li>
+        <li><a class="nav-link text-light" href="{% url 'homework' %}">Homework</a></li>
+        <li><a class="nav-link text-light" href="{% url 'notes' %}">Notes</a></li>
+        <li><a class="nav-link text-light" href="{% url 'conversion' %}">Conversion</a></li>
+        <li><a class="nav-link text-light" href="{% url 'logout' %}">Logout</a></li>
+        {% else %}
+        <li><a class="nav-link text-light" href="{% url 'register' %}">Register</a></li>
+        <li><a class="nav-link text-light" href="{% url 'login' %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </header>
+  <br />
+  <!-- hero / page header -->
+  <div class="container">
+    <div class="card mb-4" style="border-radius:12px; overflow:hidden;">
+      <div class="card-body d-flex align-items-center" style="gap:1rem;">
+       
+        <div>
+          {% if request.user.is_authenticated %}
+          <div class="portal-accent">
+            
+            
+              <div id="portal-date">{% timezone "Africa/Lagos" %}{% now "F j, Y" %}{% endtimezone %}</div>
+              <div id="portal-time">{% timezone "Africa/Lagos" %}{% now "g:i:s A" %}{% endtimezone %} WAT</div>
+            </div>
+          </div>
+          {% else %}
+          <div class="">
+            <div><strong>Guest</strong></div>
+            <div class="portal-accent">
+              <div id="portal-date">{% timezone "Africa/Lagos" %}{% now "F j, Y" %}{% endtimezone %}</div>
+              <div id="portal-time">{% timezone "Africa/Lagos" %}{% now "g:i:s A" %}{% endtimezone %} WAT</div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <style>
+      .sidebar {
+        position: fixed;
+        top: 56px;
+        left: 0;
+        width: 220px;
+        height: 100%;
+        background: #343a40;
+        padding-top: 20px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1040;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .sidebar .nav-link {
+        padding: 10px 20px;
+        display: block;
+        color: #fff;
+        text-decoration: none;
+      }
+
+      .sidebar .nav-link:hover {
+        background: #495057;
+        color: #fff;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 70vw;
+        }
+      }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var sidebar = document.getElementById('sidebar');
+        var toggle = document.getElementById('sidebarToggle');
+        toggle.addEventListener('click', function () {
+          sidebar.classList.toggle('active');
+        });
+        // Optional: close sidebar when clicking outside
+        document.addEventListener('click', function (e) {
+          if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+            sidebar.classList.remove('active');
+          }
+        });
+      });
+    </script>
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+
+    {% block content %}
+    {% endblock content %}
+
+  </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+  <script>
+    // Live WAT clock for portal-time and portal-date
+    (function () {
+      const timeEl = document.getElementById('portal-time');
+      const dateEl = document.getElementById('portal-date');
+      if (!timeEl || !dateEl) return;
+
+      // Intl-based formatter for Africa/Lagos (WAT)
+      let timeFormatter, dateFormatter;
+      try {
+        timeFormatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Lagos', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true });
+        dateFormatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Lagos', year: 'numeric', month: 'long', day: 'numeric' });
+      } catch (e) {
+        // Fallback will compute time by applying offset from UTC (UTC+1 for WAT)
+        timeFormatter = null;
+        dateFormatter = null;
+      }
+
+      function updateClock() {
+        const now = new Date();
+        if (timeFormatter && dateFormatter) {
+          dateEl.textContent = dateFormatter.format(now);
+          timeEl.textContent = timeFormatter.format(now) + ' WAT';
+        } else {
+          // fallback: compute Lagos time by adding 1 hour to UTC
+          const utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+          const lagos = new Date(utc.getTime() + 1 * 3600 * 1000);
+          const hrs = lagos.getHours();
+          const mins = String(lagos.getMinutes()).padStart(2, '0');
+          const secs = String(lagos.getSeconds()).padStart(2, '0');
+          const ampm = hrs >= 12 ? 'PM' : 'AM';
+          const hour12 = ((hrs + 11) % 12) + 1;
+          dateEl.textContent = lagos.toLocaleDateString();
+          timeEl.textContent = `${hour12}:${mins}:${secs} ${ampm} WAT`;
+        }
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+    })();
+  </script>
+</body>
+
+</html>
