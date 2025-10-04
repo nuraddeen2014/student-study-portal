@@ -1,42 +1,69 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
-{% block content %}
-<section class='text-center container'>
-    <h2>Student Dictionary</h2>
-    <p>Enter any word to get the phonetics, definition and an example for the word</p>
-    <form action="" method="post">
-        {% csrf_token %}
-        {{form|crispy}}
-        <input class="btn btn-danger" type="submit" value="Submit">
-    </form><br>
-    <div class="content-section p-0 mt-5">
 
-        {% if input %}
-        <div class="custom-header">
-            <h2>{{input}}</h2>
-            <h6>{{phonetics}}</h6>
-            <audio id="player" src="{{audio}}"></audio>
-            <div>
-                <a onclick="document.getElementById('player').play()"><i class='fa fa-volume-up fa-2x'></i></a>
-            </div>
+{% block content %}
+<div class="container mt-5">
+
+    <!-- DICTIONARY SEARCH FORM -->
+    <div class="card shadow rounded p-4 mb-4" style="max-width: 600px; margin: auto;">
+        <h3 class="text-center mb-3">Student Dictionary</h3>
+        <p class="text-center mb-4">Enter a word to get its phonetics, definition, example, and synonyms</p>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary w-100">Submit</button>
+        </form>
+    </div>
+
+    <!-- RESULTS SECTION -->
+    {% if input %}
+    <div class="card shadow rounded p-4 mb-4">
+        <!-- Word & Phonetics -->
+        <div class="mb-3">
+            <h4>{{ input }}</h4>
+            {% if phonetics %}
+            <p class="mb-1 text-muted">Phonetics: {{ phonetics }}</p>
+            {% if audio %}
+            <audio id="player" src="{{ audio }}"></audio>
+            <a onclick="document.getElementById('player').play()" class="btn btn-outline-secondary btn-sm">
+                <i class="fa fa-volume-up"></i> Play Audio
+            </a>
+            {% endif %}
+            {% endif %}
         </div>
 
-        <hr class="p-0 m-0">
-
-        <p class="float-left">
-        <h4>Definition: {{definition}}</h4>
-        <h4>Example: {{example}}</h4>
-        </p>
-        Synonyms: 
-        {% for synonym in synonyms %}
-            {{synonym}}
-        {% endfor %}
         <hr>
 
-    </div>
-        {% else %}
-        <h2>What word do you want to learn today?</h2>
+        <!-- Definition -->
+        {% if definition %}
+        <div class="mb-3">
+            <h5>Definition</h5>
+            <p>{{ definition }}</p>
+        </div>
         {% endif %}
-</section>
+
+        <!-- Example -->
+        {% if example %}
+        <div class="mb-3">
+            <h5>Example</h5>
+            <p>{{ example }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Synonyms -->
+        {% if synonyms %}
+        <div class="mb-3">
+            <h5>Synonyms</h5>
+            <p>
+                {% for synonym in synonyms %}
+                <span class="badge bg-secondary me-1">{{ synonym }}</span>
+                {% endfor %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
 {% endblock content %}

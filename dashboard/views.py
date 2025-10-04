@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.views import generic
 import yt_dlp
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
+from django.contrib.auth import logout,login
 
 # Create your views here.
 def home(request):
@@ -20,6 +20,7 @@ def notes(request):
             notes = Notes(user=request.user, title=request.POST['title'], description=request.POST['description'])
             notes.save()
         messages.success(request, f'Notes Added from {request.user.username} Successfully!')
+        return redirect("notes")
     else:
         form = NotesForm()
     notes = Notes.objects.filter(user=request.user)
@@ -267,83 +268,79 @@ def wiki(request):
         return render(request, 'dashboard/wiki.html', context)
 
 def conversion(request):
+    answer = ''
     if request.method == "POST":
         form = ConversionForm(request.POST)
-        if request.POST['measurement'] == 'length':
-            measurement_form = ConversionLengthForm(request.POST)
-            context = {
-                'form': form,
-                'm_form': measurement_form,
-                'input': True
-            }
-            if 'input' in request.POST:
+        measurement_type = request.POST.get('measurement')
+        
+        if measurement_type == 'length':
+            m_form = ConversionLengthForm(request.POST)
+            if 'input' in request.POST and request.POST['input']:
                 first = request.POST['measure1']
                 second = request.POST['measure2']
-                input = request.POST['input']
-                answer = ''
-                if input and int(input) >= 0:
-                    if first == 'yard' and second == 'foot':
-                        answer = f"{input} yard = {int(input)*3} foot"
-                    if first == 'foot' and second == 'yard':
-                        answer = f"{input} foot = {int(input)/3} yard"
-                context = {
-                    'form': form,
-                    'm_form': measurement_form,
-                    'input': True,
-                    'answer': answer
-                }
-        
-        if request.POST['measurement'] == 'mass':
-            measurement_form = ConversionMassForm(request.POST)
-            context = {
-                'form': form,
-                'm_form': measurement_form,
-                'input': True
-            }
-            if 'input' in request.POST:
+                input_value = float(request.POST['input'])
+                if first == 'yard' and second == 'foot':
+                    answer = f"{input_value} yard = {input_value*3} foot"
+                if first == 'foot' and second == 'yard':
+                    answer = f"{input_value} foot = {input_value/3} yard"
+
+        elif measurement_type == 'mass':
+            m_form = ConversionMassForm(request.POST)
+            if 'input' in request.POST and request.POST['input']:
                 first = request.POST['measure1']
                 second = request.POST['measure2']
-                input = request.POST['input']
-                answer = ''
-                if input and int(input) >= 0:
-                    if first == 'pound' and second == 'kilogram':
-                        answer = f"{input} pound = {int(input)*0.453592} kilogram"
-                    if first == 'kilogram' and second == 'pound':
-                        answer = f"{input} kilogram = {int(input)*2.20462} pound"
-                context = {
-                    'form': form,
-                    'm_form': measurement_form,
-                    'input': True,
-                    'answer': answer
-                }
+                input_value = float(request.POST['input'])
+                if first == 'pound' and second == 'kilogram':
+                    answer = f"{input_value} pound = {input_value*0.453592} kilogram"
+                if first == 'kilogram' and second == 'pound':
+                    answer = f"{input_value} kilogram = {input_value*2.20462} pound"
 
+        elif measurement_type == 'volume':
+            m_form = ConversionVolumeForm(request.POST)
+            if 'input' in request.POST and request.POST['input']:
+                first = request.POST['measure1']
+                second = request.POST['measure2']
+                input_value = float(request.POST['input'])
+                if first == 'liter' and second == 'gallon':
+                    answer = f"{input_value} liter = {input_value*0.264172} gallon"
+                if first == 'gallon' and second == 'liter':
+                    answer = f"{input_value} gallon = {input_value*3.78541} liter"
 
-        
+        elif measurement_type == 'currency':
+            m_form = ConversionCurrencyForm(request.POST)
+            if 'input' in request.POST and request.POST['input']:
+                first = request.POST['measure1']
+                second = request.POST['measure2']
+                input_value = float(request.POST['input'])
+                # Example rates, adjust as needed
+                if first == 'naira' and second == 'dollar':
+                    answer = f"₦{input_value} = ${input_value/750:.2f}"
+                if first == 'naira' and second == 'pound':
+                    answer = f"₦{input_value} = £{input_value/930:.2f}"
+                if first == 'dollar' and second == 'naira':
+                    answer = f"${input_value} = ₦{input_value*750:.2f}"
+                if first == 'pound' and second == 'naira':
+                    answer = f"£{input_value} = ₦{input_value*930:.2f}"
+
+        context = {
+            'form': form,
+            'm_form': m_form,
+            'input': True,
+            'answer': answer
+        }
+
     else:
         form = ConversionForm()
         context = {
-            'form':form,
-            'input':False
+            'form': form,
+            'input': False
         }
+
     return render(request, 'dashboard/conversion.html', context)
 
-def register(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f"Account Created for {username}!!")
-            return redirect('login')
-        
-    else:
-        form = UserRegistrationForm() 
-    context = {
-            'form':form
-        }
-    return render(request, 'dashboard/register.html', context)
 
-@login_required
+
+"""@login_required
 def profile(request):
     # Handle user update form (username, first/last name, email)
     from .forms import UserUpdateForm
@@ -376,26 +373,83 @@ def profile(request):
         'todos_done': todos_done,
         'user_form': user_form,
     }
-    return render(request, 'dashboard/profile.html', context)
+    return render(request, 'dashboard/profile.html', context)"""
 
 
 def logout_view(request):
     # Show confirmation on GET; perform logout on POST
     if request.method == 'POST':
-        # Log current user for debugging
         try:
             user_repr = f"{request.user.username} (id={request.user.id})"
         except Exception:
             user_repr = str(request.user)
         print(f"[logout_view] POST received. user before logout: {user_repr}")
-        # Perform logout and ensure session is cleared
+
+        # Perform logout and clear session
         logout(request)
         try:
-            # force session flush as an extra measure
             request.session.flush()
         except Exception:
             pass
+
         messages.success(request, 'You have been logged out.')
         print(f"[logout_view] user after logout: {request.user}")
         return redirect('home')
+
     return render(request, 'dashboard/logout.html')
+
+
+# -------------------- PROFILE DASHBOARD --------------------
+@login_required
+def profile_dashboard(request):
+    user = request.user
+    # Ensure UserProfile exists
+    profile, created = UserProfile.objects.get_or_create(user=user)
+
+    user_form = UserUpdateForm(instance=user)
+    profile_form = UserProfileForm(instance=profile)
+
+    # User todos & homeworks
+    todos = Todo.objects.filter(user=user, is_finished=False)
+    homeworks = Homework.objects.filter(user=user, is_finished=False)
+
+    if request.method == "POST":
+        user_form = UserUpdateForm(request.POST, instance=user)
+        profile_form = UserProfileForm(request.POST, instance=profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, "Profile updated successfully!")
+
+    context = {
+        "user_form": user_form,
+        "profile_form": profile_form,
+        "todos": todos,
+        "homeworks": homeworks,
+        "todos_done": not todos.exists(),
+        "homework_done": not homeworks.exists(),
+    }
+    return render(request, "dashboard/profile.html", context)
+
+
+
+
+
+# --- View ---
+def register(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Ensure UserProfile is created
+            UserProfile.objects.get_or_create(user=user)
+            messages.success(request, "Your account has been created successfully!")
+            # Optionally auto-login user
+
+            return redirect("login")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = UserRegistrationForm()
+
+    return render(request, 'dashboard/register.html', {'form': form})

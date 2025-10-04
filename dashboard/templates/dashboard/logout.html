@@ -5,13 +5,16 @@
     <h2 class="text-center mb-4" style="font-weight: 700; color: #343a40;">Logout</h2>
     <form method="post" action="{% url 'logout' %}">
       {% csrf_token %}
-      <input type="hidden" name="confirm" value="1">
       <p class="mb-4 text-center">Are you sure you want to log out?</p>
-      <button type="submit" class="btn btn-danger w-100">Logout</button>
+      <div class="d-flex gap-2">
+        <a href="{% url 'home' %}" class="btn btn-secondary w-50">Cancel</a>
+        <button type="submit" class="btn btn-danger w-50">Logout</button>
+      </div>
     </form>
     <div class="border-top pt-3 mt-4 text-center">
       <small class="text-muted">
-        <a class="ml-2" href="{% url 'home' %}" style="color: #007bff; text-decoration: none; font-weight: 500;">Back to Home</a>
+        <a class="ml-2" href="{% url 'home' %}" style="color: #007bff; text-decoration: none; font-weight: 500;">Back to
+          Home</a>
       </small>
     </div>
   </div>

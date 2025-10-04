@@ -2,25 +2,22 @@
 {% load static %}
 {% block content %}
 
-<section class='text-center container'>
+<div class="container mt-5">
 
-    <div class="container">
-
-        <div class="content-section p-0 mt-5">
-
-            <div class="m-3">
-                <h2>{{notes.title}}</h2>
-            </div>
-
-            <hr class="p-0 m-0">
-            <p class="description m-5 p-5">
-                {{notes.description}}
-            </p>
-            <hr>
+    <!-- NOTE DETAIL CARD -->
+    <div class="card shadow rounded p-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">{{ notes.title }}</h2>
         </div>
-
+        <div class="card-body">
+            <p class="card-text">{{ notes.description }}</p>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+            <a href="{% url 'notes' %}" class="btn btn-outline-secondary">Back to Notes</a>
+            <a href="{% url 'delete-note' notes.id %}" class="btn btn-danger">Delete Note</a>
+        </div>
     </div>
 
-</section>
+</div>
 
 {% endblock content %}

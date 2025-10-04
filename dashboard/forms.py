@@ -29,8 +29,14 @@ class TodoForm(forms.ModelForm):
         fields = ['title', 'is_finished']
 
 class ConversionForm(forms.Form):
-    CHOICES = [('length', 'Length'), ('mass', 'Mass')]
+    CHOICES = [
+        ('length', 'Length'),
+        ('mass', 'Mass'),
+        ('volume', 'Volume'),
+        ('currency', 'Currency')
+    ]
     measurement = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect)
+
 
 class ConversionLengthForm(forms.Form):
     CHOICES = [('yard', 'Yard'), ('foot', 'Foot')]
@@ -56,6 +62,23 @@ class ConversionMassForm(forms.Form):
         label='', widget=forms.Select(choices=CHOICES)
     )
 
+class ConversionVolumeForm(forms.Form):
+    CHOICES = [('liter', 'Liter'), ('gallon', 'Gallon')]
+    input = forms.CharField(required=False, widget=forms.TextInput(
+        attrs={'type':'number', 'placeholder':'Enter the Number'}
+    ))
+    measure1 = forms.CharField(label='', widget=forms.Select(choices=CHOICES))
+    measure2 = forms.CharField(label='', widget=forms.Select(choices=CHOICES))
+
+class ConversionCurrencyForm(forms.Form):
+    CHOICES = [('naira', 'Naira'), ('dollar', 'Dollar'), ('pound', 'Pound')]
+    input = forms.CharField(required=False, widget=forms.TextInput(
+        attrs={'type':'number', 'placeholder':'Enter Amount'}
+    ))
+    measure1 = forms.CharField(label='', widget=forms.Select(choices=CHOICES))
+    measure2 = forms.CharField(label='', widget=forms.Select(choices=CHOICES))
+
+
 
 
 class UserRegistrationForm(UserCreationForm):
@@ -70,3 +93,8 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
         
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['profile_picture', 'bio']

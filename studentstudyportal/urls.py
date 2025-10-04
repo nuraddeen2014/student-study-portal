@@ -25,7 +25,7 @@ urlpatterns = [
     path('register/', dash_views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name="dashboard/login.html"), name='login'),
     path('logout/', dash_views.logout_view, name='logout'),
-    path('profile/', dash_views.profile, name='profile'),
+    
     
 
 ]
