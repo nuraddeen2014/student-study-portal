@@ -1,0 +1,18 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+<div class="register-bg">
+  <div class="register-card">
+    <h2 class="register-title">Grade Submission</h2>
+    <p><strong>Student:</strong> {{ submission.student.username }}</p>
+    {% if submission.file %}
+      <p><a href="{{ submission.file.url }}" download class="btn-submit">Download Submission</a></p>
+    {% endif %}
+    <form method="POST" class="register-form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn-submit">Submit Grade</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

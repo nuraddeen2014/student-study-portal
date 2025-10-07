@@ -1,0 +1,20 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+<section class="dashboard">
+  <h1 class="dashboard-title">Available Assignments</h1>
+  <p class="dashboard-subtitle">Click an assignment to view details and submit</p>
+
+  <div class="dashboard-grid">
+    {% for assignment in assignments %}
+    <a href="{% url 'assignment_detail' assignment.id %}" class="dashboard-card">
+      <img src="{% static 'images/homework.jpg' %}" alt="Assignment">
+      <h5>{{ assignment.title }}</h5>
+      <p>Due: {{ assignment.due_date|date:"M d, Y H:i" | default:"No date set" }}</p>
+    </a>
+    {% empty %}
+    <p>No assignments available.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

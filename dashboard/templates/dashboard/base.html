@@ -51,10 +51,17 @@
               <li><a href="{% url 'dictionary' %}" title="Dictionary">Dictionary</a></li>
               <li><a href="{% url 'youtube' %}" title="Youtube">YouTube</a></li>
               <li><a href="{% url 'todo' %}" title="Todo">Todo</a></li>
+              {% if not request.user.is_staff %}
               <li><a href="{% url 'homework' %}" title="Homework">Homework</a></li>
+              {% endif %}
               <li><a href="{% url 'notes' %}" title="Notes">Notes</a></li>
               <li><a href="{% url 'conversion' %}" title="Conversion Tool">Conversion</a></li>
               <li><a href="{% url 'logout' %}" title="Logout">Logout</a></li>
+              {% if request.user.is_staff %}
+              <li><a href="assignments/lecturer" title="assignments">Assignments</a></li>
+              {% else %}
+              <li><a href="assignments/student" title="assignments">Assignments</a></li>
+              {% endif %}
             </ul>
           </li>
         {% else %}

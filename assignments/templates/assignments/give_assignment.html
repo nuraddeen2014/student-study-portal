@@ -1,0 +1,14 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+<div class="register-bg">
+  <div class="register-card">
+    <h2 class="register-title">Create Assignment</h2>
+    <form method="POST" class="register-form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn-submit">Save Assignment</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

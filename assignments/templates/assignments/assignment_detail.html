@@ -1,0 +1,46 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+<section class="dashboard">
+  <h1 class="dashboard-title">{{ assignment.title }}</h1>
+  <p class="dashboard-subtitle">{{ assignment.description }}</p>
+  <p><strong>Course:</strong> {{ assignment.course_code }}</p>
+  <p><strong>Due:</strong> {{ assignment.due_date|date:"M d, Y H:i" | default:"No due date" }}</p>
+
+  {% if user.is_staff %}
+    <h3 class="mt-3">Student Submissions</h3>
+    <div class="dashboard-grid">
+      {% for submission in submissions %}
+        <div class="dashboard-card">
+          <h5>{{ submission.student.username }}</h5>
+          <p>Submitted: {{ submission.submitted_at|date:"M d, Y H:i" }}</p>
+          {% if submission.grade %}
+            <p>Grade: {{ submission.grade }}</p>
+          {% else %}
+            <a href="{% url 'grade-submission' submission.id %}" class="btn-submit">Grade</a>
+          {% endif %}
+          {% if submission.file %}
+            <p><a href="{{ submission.file.url }}" download>Download file</a></p>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p>No submissions yet.</p>
+      {% endfor %}
+    </div>
+  {% else %}
+    {% if existing_submission %}
+      <div class="register-card" style="max-width:600px; margin: 1rem auto;">
+        <p>You have already submitted this assignment.</p>
+        {% if existing_submission.file %}
+          <a href="{{ existing_submission.file.url }}" download class="btn-submit">Download your submission</a>
+        {% endif %}
+        {% if existing_submission.grade %}
+          <p>Grade: {{ existing_submission.grade }}</p>
+        {% endif %}
+      </div>
+    {% else %}
+      <a href="{% url 'submit-assignment' assignment.id %}" class="btn-submit">Submit Assignment</a>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

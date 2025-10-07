@@ -214,3 +214,19 @@ nav {
         display: block;
     }
 }
+
+/* Add to end of main.css or register.css */
+.register-form .form-group {
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.register-form input,
+.register-form textarea,
+.register-form select {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
