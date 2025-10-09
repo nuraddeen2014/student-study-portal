@@ -91,31 +91,33 @@ def delete_homework(request,pk=None):
     return redirect("homework")
 
 def youtube(request):
-    if request.method == "POST":
-        form = DashboardForm(request.POST)
-        text = request.POST['text']
-        ydl_opts = {'quiet': True, 'extract_flat': True, 'skip_download': True}
-        results = []
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            search_url = f"ytsearch10:{text}"
-            info = ydl.extract_info(search_url, download=False)
-            for entry in info.get('entries', []):
-                results.append({
-                    'title': entry.get('title'),
-                    'channel': entry.get('uploader'),
-                    'link': f"https://www.youtube.com/watch?v={entry.get('id')}",
-                    'thumbnail': entry.get('thumbnails', [{}])[0].get('url', ''),
-                    'description': entry.get('description', ''),
-                    'duration': entry.get('duration'),
-                    'views': entry.get('view_count'),
-                    'published': entry.get('upload_date'),
-                })
-        context = {'form': form, 'results': results}
+    
+        if request.method == "POST":
+            form = DashboardForm(request.POST)
+            text = request.POST['text']
+            ydl_opts = {'quiet': True, 'extract_flat': True, 'skip_download': True}
+            results = []
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                search_url = f"ytsearch10:{text}"
+                info = ydl.extract_info(search_url, download=False)
+                for entry in info.get('entries', []):
+                    results.append({
+                        'title': entry.get('title'),
+                        'channel': entry.get('uploader'),
+                        'link': f"https://www.youtube.com/watch?v={entry.get('id')}",
+                        'thumbnail': entry.get('thumbnails', [{}])[0].get('url', ''),
+                        'description': entry.get('description', ''),
+                        'duration': entry.get('duration'),
+                        'views': entry.get('view_count'),
+                        'published': entry.get('upload_date'),
+                    })
+            context = {'form': form, 'results': results}
+            return render(request, 'dashboard/youtube.html', context)
+        else:
+            form = DashboardForm()
+        context = {'form': form}
         return render(request, 'dashboard/youtube.html', context)
-    else:
-        form = DashboardForm()
-    context = {'form': form}
-    return render(request, 'dashboard/youtube.html', context)
+
 
 @login_required
 def todo(request):

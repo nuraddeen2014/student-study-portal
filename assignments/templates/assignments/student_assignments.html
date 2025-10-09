@@ -8,7 +8,7 @@
   <div class="dashboard-grid">
     {% for assignment in assignments %}
     <a href="{% url 'assignment_detail' assignment.id %}" class="dashboard-card">
-      <img src="{% static 'images/homework.jpg' %}" alt="Assignment">
+      <img src="{% static 'images/assignment.jpg' %}" alt="Assignment">
       <h5>{{ assignment.title }}</h5>
       <p>Due: {{ assignment.due_date|date:"M d, Y H:i" | default:"No date set" }}</p>
     </a>

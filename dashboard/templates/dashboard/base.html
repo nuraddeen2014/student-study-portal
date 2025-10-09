@@ -8,7 +8,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+  <!--Use if statement to personalize roles-->
+  {% if request.user.is_staff %}
+  <title>Lecturer-dashboard</title>
+  {% else %}
   <title>Student-dashboard</title>
+  {% endif %}
+
+  <!--load fonts and favicons-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
@@ -18,7 +26,7 @@
   <link rel="stylesheet" href="{% static 'css/main.css' %}" />
   <link rel="stylesheet" href="{% static 'css/register.css' %}" />
   <link rel="stylesheet" href="{% static 'css/login.css' %}" />
-  lin
+  
 </head>
 
 <body>
@@ -56,12 +64,13 @@
               {% endif %}
               <li><a href="{% url 'notes' %}" title="Notes">Notes</a></li>
               <li><a href="{% url 'conversion' %}" title="Conversion Tool">Conversion</a></li>
-              <li><a href="{% url 'logout' %}" title="Logout">Logout</a></li>
+              
               {% if request.user.is_staff %}
-              <li><a href="assignments/lecturer" title="assignments">Assignments</a></li>
+              <li><a href="{% url "lecturer-assignments" %}" title="assignments">Give Assignments</a></li>
               {% else %}
-              <li><a href="assignments/student" title="assignments">Assignments</a></li>
+              <li><a href="{% url "student-assignments" %}" title="assignments">View Assignments</a></li>
               {% endif %}
+              <li><a href="{% url 'logout' %}" title="Logout">Logout</a></li>
             </ul>
           </li>
         {% else %}

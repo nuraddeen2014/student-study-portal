@@ -3,7 +3,12 @@
 {% block content %}
 
 <section class="dashboard">
+
+  {% if request.user.is_staff %}
+  <h1 class="dashboard-title">Welcome</h1>
+  {% else %}
   <h1 class="dashboard-title">Welcome to Your Study Portal</h1>
+  {% endif %}
   <p class="dashboard-subtitle">Choose a tool below to get started:</p>
 
   <div class="dashboard-grid">

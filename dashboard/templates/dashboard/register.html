@@ -6,17 +6,34 @@
 <div class="register-bg">
   <div class="register-card">
     <h2 class="register-title">Create Your Account</h2>
+
     <form method="POST" enctype="multipart/form-data" class="register-form">
-      {% csrf_token %}     
-      <div class="container">
-      <legend class="border-bottom mb-4">Join Today</legend>
-      {{form}}
-      <!-- Submit Button -->
-       <div class="form-group">
+      {% csrf_token %}
+
+      <!-- Non-field errors (e.g., password mismatch, duplicate username) -->
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
         </div>
+      {% endif %}
+
+      <!-- Render each form field with label and error -->
+      {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="text-danger small">
+              {{ field.errors|striptags }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <!-- Submit Button -->
       <button type="submit" class="btn-submit">Sign Up</button>
-      </div>
     </form>
+
     <p class="login-text">
       Already have an account?
       <a href="{% url 'login' %}">Sign In</a>

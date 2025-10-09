@@ -1,39 +1,44 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
 {% block content %}
-<div class="auth-container">
-  <div class="auth-box">
-    <!-- Header -->
-    <h2 class="auth-title">Sign In</h2>
 
-    <!-- Login Form -->
-    <form method="POST" class="auth-form">
+<!-- Background -->
+<div class="register-bg">
+  <div class="register-card">
+    <h2 class="register-title">LOGIN</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="register-form">
       {% csrf_token %}
-      <input type="hidden" name="next" value="{% url 'home' %}">
 
-      <!-- Username -->
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username" placeholder="Enter your username" required>
-      </div>
+      <!-- Non-field errors (e.g., password mismatch, duplicate username) -->
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
 
-      <!-- Password -->
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password" placeholder="Enter your password" required>
-      </div>
+      <!-- Render each form field with label and error -->
+      {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="text-danger small">
+              {{ field.errors|striptags }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
 
-      <!-- Submit -->
+      <!-- Submit Button -->
       <button type="submit" class="btn-submit">Sign In</button>
     </form>
 
-    <!-- Links -->
-    <div class="auth-links">
-      <p>Need an account?
-        <a href="{% url 'register' %}">Create one</a>
-      </p>
-
-    </div>
+    <p class="login-text">
+      Don't have an account?
+      <a href="{% url 'register' %}">Sign Up</a>
+    </p>
   </div>
 </div>
+
 {% endblock content %}
