@@ -3,7 +3,6 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-
 <div class="container mt-5" style="max-width: 600px;">
   <!-- Search Form Card -->
   <div class="card shadow p-4 mb-4" style="border-radius: 1rem;">
@@ -33,27 +32,29 @@
     </div>
 
     {% if details %}
-    <hr>
-    <div class="mt-3">
-      {% if details|length > 0 %}
-        {% if details.0 %}
-          <!-- Handle disambiguation lists -->
+      <hr>
+      <div class="card shadow-sm rounded p-4">
+        {% if is_disambiguation %}
+          <p>The term you searched for is ambiguous. Possible matches:</p>
           <ul>
             {% for option in details %}
-              <li>{{ option }}</li>
+              <li>
+                <form method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="text" value="{{ option }}">
+                  <button type="submit" class="btn btn-link p-0 m-0 align-baseline text-primary">
+                    {{ option }}
+                  </button>
+                </form>
+              </li>
             {% endfor %}
           </ul>
         {% else %}
           <p>{{ details }}</p>
         {% endif %}
-      {% else %}
-        <p class="text-muted">No additional details available.</p>
-      {% endif %}
-    </div>
+      </div>
     {% endif %}
   </div>
   {% endif %}
-
 </div>
-
 {% endblock content %}

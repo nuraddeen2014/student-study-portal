@@ -17,8 +17,8 @@
 
     <!-- RESULTS SECTION -->
     {% if results %}
-    <div class="mt-4">
-        {% for result in results %}
+ <div class="card shadow p-4" style="border-radius: 1rem;">
+            {% for result in results %}
         <a href="{{ result.link }}" target="_blank" class="text-decoration-none">
             <div class="card shadow rounded mb-4">
                 <div class="row g-0">

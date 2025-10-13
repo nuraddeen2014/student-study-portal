@@ -12,8 +12,15 @@
             <a href="{% url 'notes-detail' note.id %}" style="text-decoration: none; color: inherit;">
                 <div class="card shadow rounded h-100">
                     <div class="card-header bg-primary text-white">{{ note.title }}</div>
-                    <div class="card-body">
-                        {{ note.description|slice:"0:100" }}{% if note.description|length > 100 %}...{% endif %}
+                    <div class="card-body text-center">
+                        {% if note.image %}
+                            <img src="{{ note.image.url }}" alt="Note Image" class="img-fluid rounded mb-2" style="max-height:150px; object-fit:cover;">
+                            {% if note.description %}
+                                <small class="text-muted d-block">{{ note.description|slice:"0:60" }}{% if note.description|length > 60 %}...{% endif %}</small>
+                            {% endif %}
+                        {% else %}
+                            {{ note.description|slice:"0:100" }}{% if note.description|length > 100 %}...{% endif %}
+                        {% endif %}
                     </div>
                     <div class="card-footer d-flex justify-content-end">
                         <a href="{% url 'delete-note' note.id %}" class="text-danger">
@@ -31,7 +38,7 @@
     <!-- CREATE NOTE FORM -->
     <div class="card shadow rounded p-4 mt-5">
         <h3 class="mb-3">Create Note</h3>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form|crispy }}
             <button type="submit" class="btn btn-primary w-100">Create</button>

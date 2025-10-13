@@ -32,54 +32,54 @@
 <body>
   <header>
     <nav class="">
-  <div class="top-navbar">
-    <!-- Brand -->
-    <a class="" href="{% url 'home' %}">STUDENT STUDY PORTAL</a>
-    
-    <!-- Hamburger button for small screens -->
-    <div class="">
-      <button class="" id="menu-toggle" type="button">
-        <i class="fas fa-bars"></i>
-      </button>
+      <div class="top-navbar">
+      <!-- Brand -->
+      <a class="" href="{% url 'home' %}">STUDENT STUDY PORTAL</a>
       
-      <!-- Navbar Links -->
-      <ul class="nav-links">
-        <!-- Always visible items -->
-        <li><a href="{% url 'home' %}" title="Home"><i class="fa-sharp fa-regular fa-house"></i></a></li>
+      <!-- Hamburger button for small screens -->
+      <div class="nav-container">
+        <button class="" id="menu-toggle" type="button">
+          <i class="fas fa-bars"></i>
+        </button>
+        
+        <!-- Navbar Links -->
+        <ul class="nav-links">
+          <!-- Always visible items -->
+          <li><a href="{% url 'home' %}" title="Home"><i class="fa-sharp fa-regular fa-house"></i></a></li>
 
-        {% if request.user.is_authenticated %}
-          <li><a href="{% url 'profile' %}" title="Your Profile"><i class="fa-sharp fa-solid fa-user"></i></a></li>
-          <li><a href="{% url 'books' %}" title="Search Books"><i class="fa-solid fa-book-open"></i></a></li>
+          {% if request.user.is_authenticated %}
+            <li><a href="{% url 'profile' %}" title="Your Profile"><i class="fa-sharp fa-solid fa-user"></i></a></li>
+            <li><a href="{% url 'books' %}" title="Search Books"><i class="fa-solid fa-book-open"></i></a></li>
 
-          <!-- Dropdown for extra items -->
-          <li class="dropdown">
-            <a href="#">More ▼</a>
-            <ul class="dropdown-menu">
-              <li><a href="{% url 'wiki' %}" title="Wikipedia">Wikipedia</a></li>
-              <li><a href="{% url 'dictionary' %}" title="Dictionary">Dictionary</a></li>
-              <li><a href="{% url 'youtube' %}" title="Youtube">YouTube</a></li>
-              <li><a href="{% url 'todo' %}" title="Todo">Todo</a></li>
-              {% if not request.user.is_staff %}
-              <li><a href="{% url 'homework' %}" title="Homework">Homework</a></li>
-              {% endif %}
-              <li><a href="{% url 'notes' %}" title="Notes">Notes</a></li>
-              <li><a href="{% url 'conversion' %}" title="Conversion Tool">Conversion</a></li>
-              
-              {% if request.user.is_staff %}
-              <li><a href="{% url "lecturer-assignments" %}" title="assignments">Give Assignments</a></li>
-              {% else %}
-              <li><a href="{% url "student-assignments" %}" title="assignments">View Assignments</a></li>
-              {% endif %}
-              <li><a href="{% url 'logout' %}" title="Logout">Logout</a></li>
-            </ul>
-          </li>
-        {% else %}
-          <!-- If not logged in -->
-          <li><a href="{% url 'register' %}">Register</a></li>
-          <li><a href="{% url 'login' %}">Login</a></li>
-        {% endif %}
-      </ul>
-    </div>
+            <!-- Dropdown for extra items -->
+            <li class="dropdown">
+              <a href="#">More ▼</a>
+              <ul class="dropdown-menu">
+                <li><a href="{% url 'wiki' %}" title="Wikipedia">Wikipedia</a></li>
+                <li><a href="{% url 'dictionary' %}" title="Dictionary">Dictionary</a></li>
+                <li><a href="{% url 'youtube' %}" title="Youtube">YouTube</a></li>
+                <li><a href="{% url 'todo' %}" title="Todo">Todo</a></li>
+                {% if not request.user.is_staff %}
+                <li><a href="{% url 'homework' %}" title="Homework">Homework</a></li>
+                {% endif %}
+                <li><a href="{% url 'notes' %}" title="Notes">Notes</a></li>
+                <li><a href="{% url 'conversion' %}" title="Conversion Tool">Conversion</a></li>
+                
+                {% if request.user.is_staff %}
+                <li><a href="{% url "lecturer-assignments" %}" title="assignments">Give Assignments</a></li>
+                {% else %}
+                <li><a href="{% url "student-assignments" %}" title="assignments">View Assignments</a></li>
+                {% endif %}
+                <li><a href="{% url 'logout' %}" title="Logout">Logout</a></li>
+              </ul>
+            </li>
+          {% else %}
+            <!-- If not logged in -->
+            <li><a href="{% url 'register' %}">Register</a></li>
+            <li><a href="{% url 'login' %}">Login</a></li>
+          {% endif %}
+        </ul>
+      </div>
   </div>
 </nav>
 
@@ -93,6 +93,8 @@
     
 
   <main>
+    <br>
+    
     {% if messages %}
     {% for message in messages %}
     <div class="alert alert-{{ message.tags }}">{{ message }}</div>

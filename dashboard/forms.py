@@ -5,10 +5,16 @@ from crispy_forms.layout import Layout, Submit
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
+from django import forms
+from .models import Notes
+
 class NotesForm(forms.ModelForm):
     class Meta:
         model = Notes
-        fields = ['title', 'description']
+        fields = ['title', 'description', 'image']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write your note or leave blank if uploading an image...'}),
+        }
 
 
 class DateInput(forms.DateInput):

@@ -3,21 +3,23 @@
 {% block content %}
 
 <div class="container mt-5">
-
-    <!-- NOTE DETAIL CARD -->
     <div class="card shadow rounded p-4">
         <div class="card-header bg-primary text-white">
-            <h2 class="mb-0">{{ notes.title }}</h2>
+            <h2 class="mb-0">{{ note.title }}</h2>
         </div>
-        <div class="card-body">
-            <p class="card-text">{{ notes.description }}</p>
+        <div class="card-body text-center">
+            {% if note.image %}
+                <img src="{{ note.image.url }}" alt="{{ note.title }}" class="img-fluid rounded mb-3" style="max-height:400px; object-fit:contain;">
+            {% endif %}
+            {% if note.description %}
+                <p class="card-text">{{ note.description }}</p>
+            {% endif %}
         </div>
         <div class="card-footer d-flex justify-content-between">
             <a href="{% url 'notes' %}" class="btn btn-outline-secondary">Back to Notes</a>
-            <a href="{% url 'delete-note' notes.id %}" class="btn btn-danger">Delete Note</a>
+            <a href="{% url 'delete-note' note.id %}" class="btn btn-danger">Delete Note</a>
         </div>
     </div>
-
 </div>
 
 {% endblock content %}

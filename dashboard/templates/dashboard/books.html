@@ -3,17 +3,20 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-<section class='text-center container'>
-    <h2>Search books and browse your favorite</h2>
-    <p>just enter the search query to obtain the results</p><b></b>
-    <form action="" method="post">
-        {% csrf_token %}
-        {{form|crispy}}
-        <input class="btn btn-danger" type="submit" value="Submit">
-    </form><br>
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow p-4 mb-4" style="border-radius: 1rem;">
+        <h2>Search your favorite books</h2>
+        <p>just enter the search query to obtain the results</p><b></b>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{form|crispy}}
+            <input class="btn btn-primary w-100" type="submit" value="Submit">
+        </form><br>
+    </div>
+    <!--Results Section-->
     {% for result in results %}
     <a href="{{result.preview}}" target="_blank">
-        <div class="card">
+         <div class="card shadow p-4" style="border-radius: 1rem;">
             <div class="card-header">
                 <div class="row">
                     <div class="col-md-3">
@@ -57,6 +60,6 @@
     </a>
     {% endfor %}
     <br>
-</section>
+</div>
 
 {% endblock content %}

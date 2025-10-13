@@ -15,25 +15,32 @@ def home(request):
 @login_required
 def notes(request):
     if request.method == "POST":
-        form = NotesForm(request.POST)
+        form = NotesForm(request.POST, request.FILES)
         if form.is_valid():
-            notes = Notes(user=request.user, title=request.POST['title'], description=request.POST['description'])
-            notes.save()
-        messages.success(request, f'Notes Added from {request.user.username} Successfully!')
-        return redirect("notes")
+            note = form.save(commit=False)
+            note.user = request.user
+            note.save()
+            messages.success(request, f'Note added successfully!')
+            return redirect("notes")
     else:
         form = NotesForm()
-    notes = Notes.objects.filter(user=request.user)
-    context = {'notes':notes, 'form':form}
+
+    notes = Notes.objects.filter(user=request.user).order_by('-created_at')
+    context = {'notes': notes, 'form': form}
     return render(request, 'dashboard/notes.html', context)
+
 
 @login_required
 def delete_note(request, pk=None):
-    Notes.objects.get(id=pk).delete()
+    Notes.objects.get(id=pk, user=request.user).delete()
+    messages.success(request, "Note deleted successfully!")
     return redirect("notes")
+
 
 class NotesDetailView(generic.DetailView):
     model = Notes
+    template_name = 'dashboard/notes_detail.html'
+    context_object_name = 'note'
 
 @login_required
 def homework(request):
@@ -199,71 +206,92 @@ def books(request):
     return render(request, 'dashboard/books.html', context)
 
 def dictionary(request):
-    if request.method == "POST":
-        form = DashboardForm(request.POST)
-        text = request.POST['text']
-        url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{text}"
-        r = requests.get(url)
-        answer = r.json()
-        try:
-            phonetics = answer[0]['phonetics'][0]['text']
-            audio = answer[0]['phonetics'][0]['audio']
-            definition = answer[0]['meanings'][0]['definitions'][0]['definition']
-            example = answer[0]['meanings'][0]['definitions'][0]['example']
-            synonyms = answer[0]['meanings'][0]['definitions'][0]['synonyms']
-            context = {
-                'form': form,
-                'input': text,
-                'phonetics': phonetics,
-                'audio': audio,
-                'definition': definition,
-                'example': example,
-                'synonyms': synonyms,
-            }
-        except:
-            context = {'form': form, 'input': ""}
+    try:
+        if request.method == "POST":
+            form = DashboardForm(request.POST)
+            text = request.POST['text']
+            url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{text}"
+            r = requests.get(url)
+            answer = r.json()
+            try:
+                phonetics = answer[0]['phonetics'][0]['text']
+                audio = answer[0]['phonetics'][0]['audio']
+                definition = answer[0]['meanings'][0]['definitions'][0]['definition']
+                example = answer[0]['meanings'][0]['definitions'][0]['example']
+                synonyms = answer[0]['meanings'][0]['definitions'][0]['synonyms']
+                context = {
+                    'form': form,
+                    'input': text,
+                    'phonetics': phonetics,
+                    'audio': audio,
+                    'definition': definition,
+                    'example': example,
+                    'synonyms': synonyms,
+                }
+            except:
+                context = {'form': form, 'input': ""}
+            return render(request, 'dashboard/dictionary.html', context)
+        else:
+            form = DashboardForm()
+            context = {'form': form}
         return render(request, 'dashboard/dictionary.html', context)
-    else:
-        form = DashboardForm()
-        context = {'form': form}
-    return render(request, 'dashboard/dictionary.html', context)
+    except requests.exceptions.ConnectionError:
+        messages.error(request, "No internet connection. Please check your connection and try again.")
+        return redirect('dictionary')
 
 def wiki(request):
     if request.method == "POST":
+        text = request.POST.get('text', '').strip()
+        form = DashboardForm(request.POST)
+
+        if not text:
+            context = {
+                'form': form,
+                'title': "Please enter a valid search term."
+            }
+            return render(request, 'dashboard/wiki.html', context)
+
         try:
-            text = request.POST['text']
-            form = DashboardForm(request.POST)
             search = wikipedia.page(text)
             context = {
                 'form': form,
                 'title': search.title,
                 'link': search.url,
-                'details': search.summary
+                'details': search.summary,
+                'is_disambiguation': False
             }
             return render(request, 'dashboard/wiki.html', context)
+
         except wikipedia.exceptions.DisambiguationError as e:
-            form = DashboardForm()
             context = {
                 'form': form,
                 'title': "The term is ambiguous, please be more specific",
-                'details': e.options
+                'details': e.options,
+                'is_disambiguation': True
             }
             return render(request, 'dashboard/wiki.html', context)
-        
+
         except wikipedia.exceptions.PageError:
-            form = DashboardForm()
             context = {
                 'form': form,
-                'title': "The page does not exist, please be more specific"
+                'title': "The page does not exist, please try again"
             }
             return render(request, 'dashboard/wiki.html', context)
+
+        except (requests.exceptions.ConnectionError, wikipedia.exceptions.HTTPTimeoutError):
+            context = {
+                'form': form,
+                'title': "Connection error: please check your internet connection and try again."
+            }
+            return render(request, 'dashboard/wiki.html', context)
+
         except Exception as e:
-            form = DashboardForm()
             context = {
                 'form': form,
-                'title': "Something went wrong, please try again"
+                'title': "Something went wrong, please try again."
             }
             return render(request, 'dashboard/wiki.html', context)
+
     else:
         form = DashboardForm()
         context = {'form': form}
