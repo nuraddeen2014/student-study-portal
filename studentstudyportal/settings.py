@@ -127,13 +127,28 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 
+
+
+# Always define STATIC_URL
 STATIC_URL = '/static/'
 
-if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Local development settings (DEBUG is True)
+if DEBUG:
+    STATICFILES_DIRS = [BASE_DIR / "static"]
+    # We don't need STATIC_ROOT in debug mode, Django handles serving static files.
 
+# Production settings (DEBUG is False)
+if not DEBUG:
+    # Set STATIC_ROOT to the directory where static files are collected.
+    # We use a subfolder like 'staticfiles' to avoid conflicts.
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    
+    # Configure WhiteNoise for production static file serving.
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-STATICFILES_DIRS=[BASE_DIR/"static"]
+
+# ... (rest of your settings) ...
+# Default login and redirect settings
+
 
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'login'
