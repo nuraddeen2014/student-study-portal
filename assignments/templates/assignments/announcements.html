@@ -24,7 +24,8 @@
                     <div class="d-flex align-items-center mb-3">
                         <i class="fas fa-user-circle text-secondary me-2"></i>
                         <div class="text-secondary">
-                            Posted by <strong class="text-primary">{{ announcement.author.get_full_name|default:announcement.author.username }}</strong>
+                            Posted by <strong class="text-primary">{{
+                                announcement.author.get_full_name|default:announcement.author.username }}</strong>
                         </div>
                     </div>
                     <div class="d-flex align-items-center mb-3">
