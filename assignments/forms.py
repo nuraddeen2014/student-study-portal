@@ -1,5 +1,5 @@
 from django import forms
-from .models import Assignment, Submission
+from .models import Assignment, Submission, Announcement
 
 class AssignmentForm(forms.ModelForm):
     class Meta:
@@ -27,4 +27,14 @@ class GradeForm(forms.ModelForm):
         fields = ['grade']
         widgets = {
             'grade': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter grade'}),
+        }
+
+
+class AnnouncementForm(forms.ModelForm):
+    class Meta:
+        model = Announcement
+        fields = ['title', 'content']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Announcement title'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Announcement content'}),
         }

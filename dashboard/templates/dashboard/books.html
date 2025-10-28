@@ -13,6 +13,11 @@
             <input class="btn btn-primary w-100" type="submit" value="Submit">
         </form><br>
     </div>
+
+    {% if message %}
+  <div class="alert alert-warning text-center">{{ message }}</div>
+{% endif %}
+
     <!--Results Section-->
     {% for result in results %}
     <a href="{{result.preview}}" target="_blank">

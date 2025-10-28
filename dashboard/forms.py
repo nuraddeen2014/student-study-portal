@@ -8,12 +8,29 @@ from django.contrib.auth.models import User
 from django import forms
 from .models import Notes
 
+class NotesGroupForm(forms.ModelForm):
+    class Meta:
+        model = NotesGroup
+        fields = ['name', 'description', 'color']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Optional description for this group...'}),
+            'color': forms.Select(choices=[
+                ('primary', 'Blue'),
+                ('success', 'Green'),
+                ('danger', 'Red'),
+                ('warning', 'Yellow'),
+                ('info', 'Light Blue'),
+                ('secondary', 'Gray'),
+            ]),
+        }
+
 class NotesForm(forms.ModelForm):
     class Meta:
         model = Notes
-        fields = ['title', 'description', 'image']
+        fields = ['group', 'title', 'description', 'image']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write your note or leave blank if uploading an image...'}),
+            'group': forms.Select(attrs={'class': 'form-select'}),
         }
 
 
@@ -77,12 +94,42 @@ class ConversionVolumeForm(forms.Form):
     measure2 = forms.CharField(label='', widget=forms.Select(choices=CHOICES))
 
 class ConversionCurrencyForm(forms.Form):
-    CHOICES = [('naira', 'Naira'), ('dollar', 'Dollar'), ('pound', 'Pound')]
-    input = forms.CharField(required=False, widget=forms.TextInput(
-        attrs={'type':'number', 'placeholder':'Enter Amount'}
-    ))
-    measure1 = forms.CharField(label='', widget=forms.Select(choices=CHOICES))
-    measure2 = forms.CharField(label='', widget=forms.Select(choices=CHOICES))
+    # Use ISO currency codes as values (these match exchange rate API expectations)
+    CHOICES = [
+        ('USD', 'US Dollar'),
+        ('EUR', 'Euro'),
+        ('GBP', 'British Pound'),
+        ('JPY', 'Japanese Yen'),
+        ('AUD', 'Australian Dollar'),
+        ('CAD', 'Canadian Dollar'),
+        ('CHF', 'Swiss Franc'),
+        ('CNY', 'Chinese Yuan'),
+        ('INR', 'Indian Rupee'),
+        ('NGN', 'Nigerian Naira'),
+        ('ZAR', 'South African Rand'),
+        ('BRL', 'Brazilian Real'),
+        ('RUB', 'Russian Ruble'),
+        ('SEK', 'Swedish Krona'),
+        ('NOK', 'Norwegian Krone'),
+        ('DKK', 'Danish Krone'),
+        ('MXN', 'Mexican Peso'),
+        ('SGD', 'Singapore Dollar'),
+        ('HKD', 'Hong Kong Dollar'),
+        ('NZD', 'New Zealand Dollar'),
+        ('KRW', 'South Korean Won'),
+        ('TRY', 'Turkish Lira')
+    ]
+
+    # Use DecimalField to validate numeric input cleanly
+    amount = forms.DecimalField(
+        required=False,  # allow displaying the form before user enters an amount
+        min_value=0,
+        label='',
+        widget=forms.NumberInput(attrs={'placeholder': 'Enter amount', 'step': 'any'})
+    )
+
+    from_currency = forms.ChoiceField(label='', choices=CHOICES)
+    to_currency = forms.ChoiceField(label='', choices=CHOICES)
 
 
 

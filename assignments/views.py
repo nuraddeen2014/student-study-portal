@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 
-from .models import Assignment, Submission
-from .forms import AssignmentForm, SubmissionForm, GradeForm
+from .models import Assignment, Submission, Announcement
+from .forms import AssignmentForm, SubmissionForm, GradeForm, AnnouncementForm
 
 # restrict lecturer actions only to staff users, check request.user.is_staff
 # Admin will create lecturers — mark them as is_staff=True
@@ -43,12 +43,17 @@ def lecturer_assignments(request):
 def student_assignments(request):
     # Students: view all assignments (later filter by enrollment)
     assignments = Assignment.objects.all().order_by('-created_at')
-    return render(request, 'assignments/student_assignments.html', {'assignments': assignments})
+    now = timezone.now()
+    return render(request, 'assignments/student_assignments.html', {
+        'assignments': assignments,
+        'now': now
+    })
 
 
 @login_required
 def assignment_detail(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
+    now = timezone.now()
 
     # Student: check if they already submitted
     existing_submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
@@ -113,3 +118,50 @@ def grade_submission(request, submission_id):
         form = GradeForm(instance=submission)
 
     return render(request, 'assignments/grade_submission.html', {'form': form, 'submission': submission})
+
+
+@login_required
+def lecturer_dashboard(request):
+    """Lecturer dashboard: quick stats, recent submissions, and announcements."""
+    if not request.user.is_staff:
+        messages.error(request, "Permission denied.")
+        return redirect('student-assignments')
+
+    assignments_count = Assignment.objects.filter(lecturer=request.user).count()
+    ungraded_count = Submission.objects.filter(assignment__lecturer=request.user, grade__isnull=True).count()
+    recent_submissions = Submission.objects.filter(assignment__lecturer=request.user).order_by('-submitted_at')[:10]
+    announcements = Announcement.objects.filter(author=request.user).order_by('-created_at')[:10]
+
+    context = {
+        'assignments_count': assignments_count,
+        'ungraded_count': ungraded_count,
+        'recent_submissions': recent_submissions,
+        'announcements': announcements,
+    }
+    return render(request, 'assignments/lecturer_dashboard.html', context)
+
+
+@login_required
+@login_required
+def view_announcements(request):
+    """View all announcements, accessible to both students and lecturers."""
+    announcements = Announcement.objects.all().order_by('-created_at')
+    return render(request, 'assignments/announcements.html', {'announcements': announcements})
+
+def create_announcement(request):
+    if not request.user.is_staff:
+        messages.error(request, "Permission denied.")
+        return redirect('student-assignments')
+
+    if request.method == 'POST':
+        form = AnnouncementForm(request.POST)
+        if form.is_valid():
+            ann = form.save(commit=False)
+            ann.author = request.user
+            ann.save()
+            messages.success(request, 'Announcement posted.')
+            return redirect('lecturer-dashboard')
+    else:
+        form = AnnouncementForm()
+
+    return render(request, 'assignments/announcement_create.html', {'form': form})

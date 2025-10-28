@@ -8,9 +8,15 @@
   <div class="dashboard-grid">
     {% for assignment in assignments %}
     <a href="{% url 'assignment_detail' assignment.id %}" class="dashboard-card">
-      <img src="{% static 'images/assignment.jpg' %}" alt="Assignment">
+      <img src="{{ assignment.image_url }}" 
+        alt="{{ assignment.course_code }}"
+        class="img-fluid mb-2" style="height: 150px; object-fit: cover;">
       <h5>{{ assignment.title }}</h5>
-      <p>Due: {{ assignment.due_date|date:"M d, Y H:i" | default:"No date set" }}</p>
+      <p class="text-muted mb-1">{{ assignment.course_code }}</p>
+      <p class="mb-1"><small>Posted by: {{ assignment.lecturer.get_full_name|default:assignment.lecturer.username }}</small></p>
+      <p class="mb-0 {% if assignment.due_date and assignment.due_date < now %}text-danger{% endif %}">
+        Due: {{ assignment.due_date|date:"M d, Y H:i" | default:"No date set" }}
+      </p>
     </a>
     {% empty %}
     <p>No assignments available.</p>

@@ -1,0 +1,84 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load tz %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Lecturer Dashboard</h2>
+    <div class="row mt-3">
+        <div class="col-md-4">
+            <div class="card p-3 h-100 d-flex flex-column">
+                <h5>Assignments</h5>
+                <p class="display-6 flex-grow-1 mb-3">{{ assignments_count }}</p>
+                <a href="{% url 'lecturer-assignments' %}" class="btn btn-sm btn-primary mt-auto">Manage assignments</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 h-100 d-flex flex-column">
+                <h5>Ungraded submissions</h5>
+                <p class="display-6 flex-grow-1 mb-3">{{ ungraded_count }}</p>
+                <a href="{% url 'lecturer-assignments' %}" class="btn btn-sm btn-warning mt-auto">View submissions</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 h-100 d-flex flex-column">
+                <h5>Announcements</h5>
+                <p class="display-6 flex-grow-1 mb-3">{{ announcements.count }}</p>
+                <a href="{% url 'create-announcement' %}" class="btn btn-sm btn-success mt-auto">New announcement</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h5>Recent submissions</h5>
+            <ul class="list-group">
+                {% for s in recent_submissions %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ s.student.username }}</strong>
+                        <div class="small">{{ s.assignment.title }} &middot; {{ s.submitted_at }}</div>
+                    </div>
+                    <div>
+                        <a href="{% url 'grade-submission' s.id %}" class="btn btn-sm btn-primary">Grade</a>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="list-group-item">No submissions yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="col-md-6">
+            <div class="text-center mb-3">
+                <h5 class="fw-bold text-primary">Your Announcements</h5>
+                <div class="border-bottom border-primary w-25 mx-auto"></div>
+            </div>
+            <ul class="list-group">
+                {% for a in announcements %}
+                <li class="list-group-item border-start border-primary border-3 shadow-sm mb-3">
+                    <h6 class="fw-bold text-primary mb-2">{{ a.title }}</h6>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-clock text-secondary me-2"></i>
+                        <span class="small text-secondary">
+                            {{ a.created_at|localtime|date:"F d, Y H:i" }}
+                            &middot;
+                            <span class="badge bg-light text-secondary border ms-1">
+                                {{ a.expires_in }}
+                                {% if a.expires_at %}
+                                <i class="fas fa-hourglass-half ms-1"></i>
+                                (expires {{ a.expires_at|localtime|date:"F d, Y H:i" }})
+                                {% endif %}
+                            </span>
+                        </span>
+                    </div>
+                    <p class="mb-0 text-dark ps-2 border-start border-light">{{ a.content|linebreaksbr }}</p>
+                </li>
+                {% empty %}
+                <li class="list-group-item">No announcements yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

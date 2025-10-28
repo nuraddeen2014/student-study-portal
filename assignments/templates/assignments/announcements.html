@@ -1,0 +1,57 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load tz %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h2 class="display-4 fw-bold text-primary mb-3">Announcements</h2>
+        <div class="border-bottom border-primary w-25 mx-auto mb-4"></div>
+    </div>
+
+    {% if user.is_staff %}
+    <div class="mb-4 text-center">
+        <a href="{% url 'create-announcement' %}" class="btn btn-primary">New Announcement</a>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            {% for announcement in announcements %}
+            <div class="card mb-3 shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-primary">{{ announcement.title }}</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-user-circle text-secondary me-2"></i>
+                        <div class="text-secondary">
+                            Posted by <strong class="text-primary">{{ announcement.author.get_full_name|default:announcement.author.username }}</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-clock text-secondary me-2"></i>
+                        <span class="text-secondary">
+                            {{ announcement.created_at|date:"F d, Y" }}
+                            &middot;
+                            <span class="badge bg-light text-secondary border">
+                                {{ announcement.expires_in }}
+                                {% if announcement.expires_at %}
+                                <i class="fas fa-hourglass-half ms-1"></i>
+                                (expires on {{ announcement.expires_at|localtime|date:"F d, Y H:i" }})
+                                {% endif %}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="card-text mt-3 pb-2 border-bottom">
+                        <p class="text-dark">{{ announcement.content|linebreaksbr }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-info">
+                No announcements yet.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

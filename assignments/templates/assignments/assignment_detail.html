@@ -2,45 +2,92 @@
 {% load static %}
 {% block content %}
 <section class="dashboard">
-  <h1 class="dashboard-title">{{ assignment.title }}</h1>
-  <p class="dashboard-subtitle">{{ assignment.description }}</p>
-  <p><strong>Course:</strong> {{ assignment.course_code }}</p>
-  <p><strong>Due:</strong> {{ assignment.due_date|date:"M d, Y H:i" | default:"No due date" }}</p>
-
-  {% if user.is_staff %}
-    <h3 class="mt-3">Student Submissions</h3>
-    <div class="dashboard-grid">
-      {% for submission in submissions %}
-        <div class="dashboard-card">
-          <h5>{{ submission.student.username }}</h5>
-          <p>Submitted: {{ submission.submitted_at|date:"M d, Y H:i" }}</p>
-          {% if submission.grade %}
-            <p>Grade: {{ submission.grade }}</p>
-          {% else %}
-            <a href="{% url 'grade-submission' submission.id %}" class="btn-submit">Grade</a>
-          {% endif %}
-          {% if submission.file %}
-            <p><a href="{{ submission.file.url }}" download>Download file</a></p>
-          {% endif %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 mx-auto">
+        <div class="card shadow-sm">
+          <img src="{{ assignment.image_url }}" 
+            alt="{{ assignment.course_code }}"
+            class="card-img-top" style="height: 200px; object-fit: cover;">
+          <div class="card-body">
+            <h1 class="card-title h2">{{ assignment.title }}</h1>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="badge bg-primary">{{ assignment.course_code }}</span>
+              <small class="text-muted">Posted by: {{
+                assignment.lecturer.get_full_name|default:assignment.lecturer.username }}</small>
+            </div>
+            <p class="card-text">{{ assignment.description }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <p class="mb-0"><strong>Created:</strong> {{ assignment.created_at|date:"M d, Y H:i" }}</p>
+              <p class="mb-0 {% if assignment.due_date and assignment.due_date < now %}text-danger{% endif %}">
+                <strong>Due:</strong> {{ assignment.due_date|date:"M d, Y H:i" | default:"No due date" }}
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+    </div>
+
+    {% if user.is_staff %}
+    <h3 class="mt-3">Student Submissions</h3>
+    <div class="row mt-4">
+      {% for submission in submissions %}
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <img
+                src="{% if submission.student.userprofile.profile_picture %}{{ submission.student.userprofile.profile_picture }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                alt="{{ submission.student.username }}" class="rounded-circle me-2"
+                style="width: 40px; height: 40px; object-fit: cover;">
+              <div>
+                <h5 class="card-title mb-0">{{ submission.student.get_full_name|default:submission.student.username }}
+                </h5>
+                <small class="text-muted">Submitted: {{ submission.submitted_at|date:"M d, Y H:i" }}</small>
+              </div>
+            </div>
+
+            {% if submission.content %}
+            <p class="card-text">{{ submission.content|truncatewords:30 }}</p>
+            {% endif %}
+
+            {% if submission.grade %}
+            <div class="alert alert-success mb-3">
+              Grade: {{ submission.grade }}/100
+            </div>
+            {% else %}
+            <a href="{% url 'grade-submission' submission.id %}" class="btn btn-warning btn-sm mb-3">Grade
+              submission</a>
+            {% endif %}
+
+            {% if submission.file %}
+            <a href="{{ submission.file.url }}" download class="btn btn-primary btn-sm">
+              <i class="fas fa-download me-1"></i> Download submission
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
       {% empty %}
-        <p>No submissions yet.</p>
+      <div class="col-12">
+        <div class="alert alert-info">No submissions yet.</div>
+      </div>
       {% endfor %}
     </div>
-  {% else %}
-    {% if existing_submission %}
-      <div class="register-card" style="max-width:600px; margin: 1rem auto;">
-        <p>You have already submitted this assignment.</p>
-        {% if existing_submission.file %}
-          <a href="{{ existing_submission.file.url }}" download class="btn-submit">Download your submission</a>
-        {% endif %}
-        {% if existing_submission.grade %}
-          <p>Grade: {{ existing_submission.grade }}</p>
-        {% endif %}
-      </div>
     {% else %}
-      <a href="{% url 'submit-assignment' assignment.id %}" class="btn-submit">Submit Assignment</a>
+    {% if existing_submission %}
+    <div class="register-card" style="max-width:600px; margin: 1rem auto;">
+      <p>You have already submitted this assignment.</p>
+      {% if existing_submission.file %}
+      <a href="{{ existing_submission.file.url }}" download class="btn-submit">Download your submission</a>
+      {% endif %}
+      {% if existing_submission.grade %}
+      <p>Grade: {{ existing_submission.grade }}</p>
+      {% endif %}
+    </div>
+    {% else %}
+    <a href="{% url 'submit-assignment' assignment.id %}" class="btn-submit">Submit Assignment</a>
     {% endif %}
-  {% endif %}
+    {% endif %}
 </section>
 {% endblock %}

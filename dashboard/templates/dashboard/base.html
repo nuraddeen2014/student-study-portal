@@ -18,36 +18,38 @@
 
   <!--load fonts and favicons-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!--<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
     integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />-->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="{% static 'css/main.css' %}" />
   <link rel="stylesheet" href="{% static 'css/register.css' %}" />
   <link rel="stylesheet" href="{% static 'css/login.css' %}" />
-  
+
 </head>
 
 <body>
   <header>
     <nav class="">
       <div class="top-navbar">
-      <!-- Brand -->
-      <a class="" href="{% url 'home' %}">STUDENT STUDY PORTAL</a>
-      
-      <!-- Hamburger button for small screens -->
-      <div class="nav-container">
-        <button class="" id="menu-toggle" type="button">
-          <i class="fas fa-bars"></i>
-        </button>
-        
-        <!-- Navbar Links -->
-        <ul class="nav-links">
-          <!-- Always visible items -->
-          <li><a href="{% url 'home' %}" title="Home"><i class="fa-sharp fa-regular fa-house"></i></a></li>
+        <!-- Brand -->
+        <a class="" href="{% url 'home' %}">STUDENT STUDY PORTAL</a>
 
-          {% if request.user.is_authenticated %}
+        <!-- Hamburger button for small screens -->
+        <div class="nav-container">
+          <button class="" id="menu-toggle" type="button">
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <!-- Navbar Links -->
+          <ul class="nav-links">
+            <!-- Always visible items -->
+            <li><a href="{% url 'home' %}" title="Home"><i class="fa-sharp fa-regular fa-house"></i></a></li>
+
+            {% if request.user.is_authenticated %}
             <li><a href="{% url 'profile' %}" title="Your Profile"><i class="fa-sharp fa-solid fa-user"></i></a></li>
             <li><a href="{% url 'books' %}" title="Search Books"><i class="fa-solid fa-book-open"></i></a></li>
 
@@ -64,37 +66,39 @@
                 {% endif %}
                 <li><a href="{% url 'notes' %}" title="Notes">Notes</a></li>
                 <li><a href="{% url 'conversion' %}" title="Conversion Tool">Conversion</a></li>
-                
+                <li><a href="{% url 'view-announcements' %}" title="Announcements">Announcements</a></li>
+
                 {% if request.user.is_staff %}
                 <li><a href="{% url "lecturer-assignments" %}" title="assignments">Give Assignments</a></li>
+                <li><a href="{% url 'lecturer-dashboard' %}" title="dashboard">Lecturer Dashboard</a></li>
                 {% else %}
                 <li><a href="{% url "student-assignments" %}" title="assignments">View Assignments</a></li>
                 {% endif %}
                 <li><a href="{% url 'logout' %}" title="Logout">Logout</a></li>
               </ul>
             </li>
-          {% else %}
+            {% else %}
             <!-- If not logged in -->
             <li><a href="{% url 'register' %}">Register</a></li>
             <li><a href="{% url 'login' %}">Login</a></li>
-          {% endif %}
-        </ul>
+            {% endif %}
+          </ul>
+        </div>
       </div>
-  </div>
-</nav>
+    </nav>
 
-   
+
   </header>
   <br />
   <!-- hero / page header -->
-  
-        
-      
-    
+
+
+
+
 
   <main>
     <br>
-    
+
     {% if messages %}
     {% for message in messages %}
     <div class="alert alert-{{ message.tags }}">{{ message }}</div>
@@ -105,7 +109,9 @@
     {% endblock content %}
 
   </main>
- 
-</body>
+
+    <!-- Bootstrap Bundle (includes Popper) for modals, dropdowns, etc. -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
 
 </html>

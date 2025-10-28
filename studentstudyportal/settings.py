@@ -138,3 +138,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Media
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# ExchangeRate-API key (set your API key here or load from environment in production)
+EXCHANGE_RATE_API_KEY = '554611298b2ce19076ce59dc'

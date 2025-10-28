@@ -8,8 +8,22 @@ from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth.models import User
 
+class NotesGroup(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    color = models.CharField(max_length=20, default='primary')  # Bootstrap color classes
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+
 class Notes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    group = models.ForeignKey(NotesGroup, on_delete=models.CASCADE, related_name='notes')
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='notes_images/', blank=True, null=True)
@@ -17,6 +31,9 @@ class Notes(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 class Homework(models.Model):

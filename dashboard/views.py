@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 import requests
 import wikipedia
 from . forms import *
@@ -15,18 +16,43 @@ def home(request):
 @login_required
 def notes(request):
     if request.method == "POST":
-        form = NotesForm(request.POST, request.FILES)
-        if form.is_valid():
-            note = form.save(commit=False)
-            note.user = request.user
-            note.save()
-            messages.success(request, f'Note added successfully!')
-            return redirect("notes")
-    else:
-        form = NotesForm()
-
+        if 'create_group' in request.POST:
+            group_form = NotesGroupForm(request.POST)
+            if group_form.is_valid():
+                group = group_form.save(commit=False)
+                group.user = request.user
+                group.save()
+                messages.success(request, f"Group '{group.name}' created successfully!")
+                return redirect('notes')
+        else:
+            form = NotesForm(request.POST, request.FILES)
+            if form.is_valid():
+                notes = form.save(commit=False)
+                notes.user = request.user
+                notes.save()
+                messages.success(request, f"Note '{notes.title}' added successfully!")
+                return redirect('notes')
+    
     notes = Notes.objects.filter(user=request.user).order_by('-created_at')
-    context = {'notes': notes, 'form': form}
+    groups = NotesGroup.objects.filter(user=request.user)
+    form = NotesForm()
+    group_form = NotesGroupForm()
+    
+    # Filter by group if specified
+    group_id = request.GET.get('group')
+    if group_id:
+        notes = notes.filter(group_id=group_id)
+        active_group = get_object_or_404(NotesGroup, id=group_id, user=request.user)
+    else:
+        active_group = None
+    
+    context = {
+        'notes': notes,
+        'form': form,
+        'groups': groups,
+        'group_form': group_form,
+        'active_group': active_group
+    }
     return render(request, 'dashboard/notes.html', context)
 
 
@@ -34,6 +60,14 @@ def notes(request):
 def delete_note(request, pk=None):
     Notes.objects.get(id=pk, user=request.user).delete()
     messages.success(request, "Note deleted successfully!")
+    return redirect("notes")
+
+@login_required
+def delete_notes_group(request, pk=None):
+    group = get_object_or_404(NotesGroup, id=pk, user=request.user)
+    group_name = group.name
+    group.delete()
+    messages.success(request, f"Group '{group_name}' deleted successfully!")
     return redirect("notes")
 
 
@@ -126,6 +160,7 @@ def youtube(request):
         return render(request, 'dashboard/youtube.html', context)
 
 
+
 @login_required
 def todo(request):
     if request.method == "POST":
@@ -178,32 +213,47 @@ def delete_todo(request,pk=None):
     messages.success(request,f'Todo deleted from {request.user.username}!!')
     return redirect("todo")
 
+import requests
+from django.shortcuts import render
+from django.conf import settings
+from decimal import Decimal, InvalidOperation
+from .forms import DashboardForm
+
 def books(request):
+    results = []
     if request.method == "POST":
         form = DashboardForm(request.POST)
-        text = request.POST['text']
-        url = f"https://www.googleapis.com/books/v1/volumes?q={text}"
-        r = requests.get(url)
-        answer = r.json()
-        results = []
-        for i in range(10):
-            result_dict = {
-                'title': answer['items'][i]['volumeInfo'].get('title'),
-                'subtitle': answer['items'][i]['volumeInfo'].get('subtitle'),
-                'description': answer['items'][i]['volumeInfo'].get('description'),
-                'count': answer['items'][i]['volumeInfo'].get('pageCount'),
-                'categories': answer['items'][i]['volumeInfo'].get('categories'),
-                'rating': answer['items'][i]['volumeInfo'].get('pageRating'),
-                'thumbnail': answer['items'][i]['volumeInfo'].get('imageLinks', {}).get('thumbnail'),
-                'preview': answer['items'][i]['volumeInfo'].get('previewLink'),
-            }
-            results.append(result_dict)
-            context = {'form': form, 'results': results}
-        return render(request, 'dashboard/books.html', context)
+        if form.is_valid():
+            text = form.cleaned_data.get('text')
+            url = f"https://www.googleapis.com/books/v1/volumes?q={text}"
+            r = requests.get(url)
+            answer = r.json()
+
+            #  Check if 'items' exists in response
+            if 'items' in answer:
+                for item in answer['items'][:10]:  # Limit to 10
+                    volume_info = item.get('volumeInfo', {})
+                    result_dict = {
+                        'title': volume_info.get('title', 'No title available'),
+                        'subtitle': volume_info.get('subtitle', ''),
+                        'description': volume_info.get('description', ''),
+                        'count': volume_info.get('pageCount', 'Unknown'),
+                        'categories': volume_info.get('categories', []),
+                        'rating': volume_info.get('averageRating', 'No rating'),
+                        'thumbnail': volume_info.get('imageLinks', {}).get('thumbnail'),
+                        'preview': volume_info.get('previewLink', '#'),
+                    }
+                    results.append(result_dict)
+            else:
+                # If no results were found
+                results = []
+                message = "No books found for your search query."
+                return render(request, 'dashboard/books.html', {'form': form, 'message': message})
     else:
         form = DashboardForm()
-    context = {'form': form}
-    return render(request, 'dashboard/books.html', context)
+
+    return render(request, 'dashboard/books.html', {'form': form, 'results': results})
+
 
 def dictionary(request):
     try:
@@ -299,13 +349,28 @@ def wiki(request):
 
 def conversion(request):
     answer = ''
+    converted_amount = None
     if request.method == "POST":
         form = ConversionForm(request.POST)
         measurement_type = request.POST.get('measurement')
+        action = request.POST.get('action', 'select')
+        do_convert = (action == 'convert')
         
         if measurement_type == 'length':
-            m_form = ConversionLengthForm(request.POST)
-            if 'input' in request.POST and request.POST['input']:
+            # Only bind the specific sub-form when performing the conversion to avoid showing
+            # "This field is required" validation messages when user only selects the tool.
+            if do_convert:
+                m_form = ConversionLengthForm(request.POST)
+            else:
+                # preserve selections if present but do not bind
+                initial = {}
+                if 'measure1' in request.POST:
+                    initial['measure1'] = request.POST.get('measure1')
+                if 'measure2' in request.POST:
+                    initial['measure2'] = request.POST.get('measure2')
+                m_form = ConversionLengthForm(initial=initial)
+
+            if do_convert and 'input' in request.POST and request.POST['input']:
                 first = request.POST['measure1']
                 second = request.POST['measure2']
                 input_value = float(request.POST['input'])
@@ -315,8 +380,17 @@ def conversion(request):
                     answer = f"{input_value} foot = {input_value/3} yard"
 
         elif measurement_type == 'mass':
-            m_form = ConversionMassForm(request.POST)
-            if 'input' in request.POST and request.POST['input']:
+            if do_convert:
+                m_form = ConversionMassForm(request.POST)
+            else:
+                initial = {}
+                if 'measure1' in request.POST:
+                    initial['measure1'] = request.POST.get('measure1')
+                if 'measure2' in request.POST:
+                    initial['measure2'] = request.POST.get('measure2')
+                m_form = ConversionMassForm(initial=initial)
+
+            if do_convert and 'input' in request.POST and request.POST['input']:
                 first = request.POST['measure1']
                 second = request.POST['measure2']
                 input_value = float(request.POST['input'])
@@ -326,8 +400,17 @@ def conversion(request):
                     answer = f"{input_value} kilogram = {input_value*2.20462} pound"
 
         elif measurement_type == 'volume':
-            m_form = ConversionVolumeForm(request.POST)
-            if 'input' in request.POST and request.POST['input']:
+            if do_convert:
+                m_form = ConversionVolumeForm(request.POST)
+            else:
+                initial = {}
+                if 'measure1' in request.POST:
+                    initial['measure1'] = request.POST.get('measure1')
+                if 'measure2' in request.POST:
+                    initial['measure2'] = request.POST.get('measure2')
+                m_form = ConversionVolumeForm(initial=initial)
+
+            if do_convert and 'input' in request.POST and request.POST['input']:
                 first = request.POST['measure1']
                 second = request.POST['measure2']
                 input_value = float(request.POST['input'])
@@ -337,26 +420,70 @@ def conversion(request):
                     answer = f"{input_value} gallon = {input_value*3.78541} liter"
 
         elif measurement_type == 'currency':
-            m_form = ConversionCurrencyForm(request.POST)
-            if 'input' in request.POST and request.POST['input']:
-                first = request.POST['measure1']
-                second = request.POST['measure2']
-                input_value = float(request.POST['input'])
-                # Example rates, adjust as needed
-                if first == 'naira' and second == 'dollar':
-                    answer = f"₦{input_value} = ${input_value/750:.2f}"
-                if first == 'naira' and second == 'pound':
-                    answer = f"₦{input_value} = £{input_value/930:.2f}"
-                if first == 'dollar' and second == 'naira':
-                    answer = f"${input_value} = ₦{input_value*750:.2f}"
-                if first == 'pound' and second == 'naira':
-                    answer = f"£{input_value} = ₦{input_value*930:.2f}"
+            # bind currency form only when converting to avoid premature validation errors
+            if do_convert:
+                m_form = ConversionCurrencyForm(request.POST)
+            else:
+                initial = {}
+                if 'from_currency' in request.POST:
+                    initial['from_currency'] = request.POST.get('from_currency')
+                if 'to_currency' in request.POST:
+                    initial['to_currency'] = request.POST.get('to_currency')
+                if 'amount' in request.POST:
+                    initial['amount'] = request.POST.get('amount')
+                m_form = ConversionCurrencyForm(initial=initial)
+            # Simple ExchangeRate-API implementation: compute converted_amount on Convert
+            converted_amount = None
+            from_curr = request.POST.get('from_currency') or request.POST.get('measure1')
+            to_curr = request.POST.get('to_currency') or request.POST.get('measure2')
+            try:
+                amount_raw = request.POST.get('amount', '')
+                if do_convert:
+                    # Basic validation
+                    if not amount_raw:
+                        converted_amount = 'Please enter a valid amount.'
+                    else:
+                        try:
+                            amt = float(amount_raw)
+                        except (ValueError, TypeError):
+                            converted_amount = 'Please enter a valid numeric amount.'
+                        else:
+                            api_key = getattr(settings, 'EXCHANGE_RATE_API_KEY', '')
+                            if not api_key:
+                                converted_amount = 'Exchange rate API key not configured.'
+                            else:
+                                base_url = f'https://v6.exchangerate-api.com/v6/{api_key}/latest/'
+                                url = f"{base_url}{from_curr}"
+                                try:
+                                    r = requests.get(url, timeout=6)
+                                    data = r.json()
+                                except requests.exceptions.RequestException as e:
+                                    converted_amount = f'API request failed: {e}'
+                                else:
+                                    if data.get('result') == 'success' and 'conversion_rates' in data:
+                                        rates = data['conversion_rates']
+                                        rate = rates.get(to_curr)
+                                        if rate is None:
+                                            converted_amount = f'No conversion rate from {from_curr} to {to_curr}.'
+                                        else:
+                                            value = round(amt * float(rate), 2)
+                                            converted_amount = f"{value} {to_curr}"
+                                    else:
+                                        msg = data.get('error-type') or data.get('message') or str(data)
+                                        converted_amount = f'Error fetching rates: {msg}'
+                else:
+                    converted_amount = None
+            except Exception as e:
+                converted_amount = f'An unexpected error occurred: {e}'
 
         context = {
             'form': form,
             'm_form': m_form,
             'input': True,
-            'answer': answer
+            'answer': answer,
+            'converted_amount': converted_amount,
+            'from_currency': request.POST.get('from_currency') or request.POST.get('measure1'),
+            'to_currency': request.POST.get('to_currency') or request.POST.get('measure2'),
         }
 
     else:
