@@ -15,27 +15,22 @@ import os
 import dj_database_url
 from dotenv import load_dotenv
 
-
+# Load environment variables from .env file
 load_dotenv()
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+# Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-kxihf*lsy*v7gs$#l4*jfyhbqf7djr10a+r5!whu*k&+7_5e1+'
-SECRET_KEY1 = os.getenv('SECRET_KEY', SECRET_KEY)
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-kxihf*lsy*v7gs$#l4*jfyhbqf7djr10a+r5!whu*k&+7_5e1+')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
-
+# Allowed hosts
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost 127.0.0.1 .onrender.com').split()
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,15 +38,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'dashboard',
+
+    # Third-party apps
     'crispy_forms',
     'crispy_bootstrap4',
+
+    # Local apps
+    'dashboard',
     'assignments',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # For serving static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,22 +78,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'studentstudyportal.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': dj_database_url.config(
-        # Replace this value with your local database's connection string.
         default='sqlite:///db.sqlite3',
         conn_max_age=600
     )
 }
 
-
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -110,63 +102,52 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
+# ----------------------------
+# Static and Media Files
+# ----------------------------
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-
-
-
-# Always define STATIC_URL
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Local development settings (DEBUG is True)
-if DEBUG:
-    STATICFILES_DIRS = [BASE_DIR / "static"]
-    # We don't need STATIC_ROOT in debug mode, Django handles serving static files.
+# Whitenoise for serving static files in production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Production settings (DEBUG is False)
-if not DEBUG:
-    # Set STATIC_ROOT to the directory where static files are collected.
-    # We use a subfolder like 'staticfiles' to avoid conflicts.
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    
-    # Configure WhiteNoise for production static file serving.
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# ... (rest of your settings) ...
-# Default login and redirect settings
-
-
-LOGIN_REDIRECT_URL = 'home'
-LOGIN_URL = 'login'
-
-    # Where to redirect after login (named URL)
-LOGIN_REDIRECT_URL = 'home'
-
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
-CRISPY_TEMPLATE_PACK = "bootstrap4"
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Media
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# ExchangeRate-API key (set your API key here or load from environment in production
-EXCHANGE_RATE_API_KEY = SECRET_KEY1
+# ----------------------------
+# Authentication
+# ----------------------------
+LOGIN_REDIRECT_URL = 'home'
+LOGIN_URL = 'login'
+
+# ----------------------------
+# Crispy Forms
+# ----------------------------
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+CRISPY_TEMPLATE_PACK = "bootstrap4"
+
+# ----------------------------
+# Default Primary Key
+# ----------------------------
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ----------------------------
+# API Keys and Environment
+# ----------------------------
+EXCHANGE_RATE_API_KEY = os.getenv('EXCHANGE_RATE_API_KEY', SECRET_KEY)
+
+# ----------------------------
+# Render Deployment Settings
+# ----------------------------
+# Ensure that Django can serve static files on Render
+if not DEBUG:
+    import mimetypes
+    mimetypes.add_type("text/css", ".css", True)
