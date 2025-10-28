@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,6 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-kxihf*lsy*v7gs$#l4*jfyhbqf7djr10a+r5!whu*k&+7_5e1+'
+SECRET_KEY1 = os.getenv('SECRET_KEY', SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -139,5 +143,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# ExchangeRate-API key (set your API key here or load from environment in production)
-EXCHANGE_RATE_API_KEY = '554611298b2ce19076ce59dc'
+# ExchangeRate-API key (set your API key here or load from environment in production
+EXCHANGE_RATE_API_KEY = SECRET_KEY1
