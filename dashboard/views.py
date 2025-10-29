@@ -259,35 +259,58 @@ def dictionary(request):
     try:
         if request.method == "POST":
             form = DashboardForm(request.POST)
-            text = request.POST['text']
+            text = request.POST.get('text', '').strip()
+
+            if not text:
+                messages.error(request, "Please enter a word to search.")
+                return redirect('dictionary')
+
             url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{text}"
-            r = requests.get(url)
-            answer = r.json()
+
             try:
-                phonetics = answer[0]['phonetics'][0]['text']
-                audio = answer[0]['phonetics'][0]['audio']
-                definition = answer[0]['meanings'][0]['definitions'][0]['definition']
-                example = answer[0]['meanings'][0]['definitions'][0]['example']
-                synonyms = answer[0]['meanings'][0]['definitions'][0]['synonyms']
-                context = {
-                    'form': form,
-                    'input': text,
-                    'phonetics': phonetics,
-                    'audio': audio,
-                    'definition': definition,
-                    'example': example,
-                    'synonyms': synonyms,
-                }
-            except:
-                context = {'form': form, 'input': ""}
+                r = requests.get(url, timeout=6)
+                r.raise_for_status()
+                answer = r.json()
+
+                # When API returns a valid result
+                if isinstance(answer, list) and len(answer) > 0:
+                    phonetics = answer[0].get('phonetics', [{}])[0].get('text', '')
+                    audio = answer[0].get('phonetics', [{}])[0].get('audio', '')
+                    definition = answer[0].get('meanings', [{}])[0].get('definitions', [{}])[0].get('definition', 'No definition available.')
+                    example = answer[0].get('meanings', [{}])[0].get('definitions', [{}])[0].get('example', 'No example available.')
+                    synonyms = answer[0].get('meanings', [{}])[0].get('definitions', [{}])[0].get('synonyms', [])
+
+                    context = {
+                        'form': form,
+                        'input': text,
+                        'phonetics': phonetics,
+                        'audio': audio,
+                        'definition': definition,
+                        'example': example,
+                        'synonyms': synonyms,
+                    }
+                else:
+                    messages.error(request, f"No results found for '{text}'.")
+                    return redirect('dictionary')
+
+            except requests.exceptions.HTTPError:
+                messages.error(request, f"No results found for '{text}'.")
+                return redirect('dictionary')
+            except requests.exceptions.RequestException:
+                messages.error(request, "Failed to fetch data from the dictionary API. Please try again later.")
+                return redirect('dictionary')
+
             return render(request, 'dashboard/dictionary.html', context)
+
         else:
             form = DashboardForm()
             context = {'form': form}
-        return render(request, 'dashboard/dictionary.html', context)
+            return render(request, 'dashboard/dictionary.html', context)
+
     except requests.exceptions.ConnectionError:
         messages.error(request, "No internet connection. Please check your connection and try again.")
         return redirect('dictionary')
+
 
 def wiki(request):
     if request.method == "POST":
