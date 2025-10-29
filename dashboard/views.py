@@ -315,7 +315,7 @@ def dictionary(request):
         }
         return render(request, 'dashboard/dictionary.html', context)
 
-    # ✅ Always handle GET safely
+    # Always handle GET safely
     return render(request, 'dashboard/dictionary.html', {'form': form})
 
 
